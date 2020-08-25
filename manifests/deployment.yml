@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: "demo-6595"
   labels:
-    app: demo
+    app: demo-6595
 spec:
   replicas: 2
   selector:
@@ -22,3 +22,23 @@ spec:
           env:
           - name: APPINSIGHTS_INSTRUMENTATIONKEY
             value: 00000000-0000-0000-0000-000000000000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "redis-cache"
+  labels:
+    app: redis-cache
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: "redis-cache"
+  template:
+    metadata:
+      labels:
+        app: "redis-cache"
+    spec:
+      containers:
+        - name: "redis-cache"
+          image: "redis"
