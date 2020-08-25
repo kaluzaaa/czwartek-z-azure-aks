@@ -1,0 +1,16 @@
+apiVersion : apps/v1beta1
+kind: Deployment
+metadata:
+  name: "demo-6595"
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: "demo-6595"
+    spec:
+      containers:
+        - name: "demo-6595"
+          image: "czwartekaks.azurecr.io/demo"
+          ports:
+          - containerPort: 8080
