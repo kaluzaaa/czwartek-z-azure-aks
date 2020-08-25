@@ -19,3 +19,6 @@ spec:
           image: "czwartekaks.azurecr.io/demo"
           ports:
           - containerPort: 8080
+          env:
+          - name: APPINSIGHTS_INSTRUMENTATIONKEY
+            value: 00000000-0000-0000-0000-000000000000
