@@ -1,0 +1,50 @@
+on: [push]
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    
+    - uses: azure/docker-login@v1
+      with:
+        login-server: czwartekaks.azurecr.io
+        username: ${{ secrets.acr_czwartekaks_username }}
+        password: ${{ secrets.acr_czwartekaks_password }}
+    
+    - name: Build and push image to ACR
+      id: build-image
+      run: |
+        docker build "$GITHUB_WORKSPACE/" -f  "Dockerfile" -t czwartekaks.azurecr.io/demov2:${{ github.sha }}
+        docker push czwartekaks.azurecr.io/demov2:${{ github.sha }}
+    
+    - uses: azure/k8s-set-context@v1
+      with:
+         kubeconfig: ${{ secrets.aks_demov2_kubeConfig }}
+      id: login
+    
+    - name: Create namespace
+      run: |
+        namespacePresent=`kubectl get namespace | grep demov2ad25 | wc -l`
+        if [ $namespacePresent -eq 0 ]
+        then
+            echo `kubectl create namespace demov2ad25`
+        fi
+
+    - uses: azure/k8s-create-secret@v1
+      with:
+        namespace: demov2ad25
+        container-registry-url: czwartekaks.azurecr.io
+        container-registry-username: ${{ secrets.acr_czwartekaks_username }}
+        container-registry-password: ${{ secrets.acr_czwartekaks_password }}
+        secret-name: demov2dockerauth
+       
+    - uses: azure/k8s-deploy@v1
+      with:
+        namespace: demov2ad25
+        manifests: |
+          manifests/deployment-1.yml
+          manifests/service-1.yml
+        images: |
+          czwartekaks.azurecr.io/demov2:${{ github.sha }}
+        imagepullsecrets: |
+          demov2dockerauth
