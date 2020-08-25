@@ -14,37 +14,37 @@ jobs:
     - name: Build and push image to ACR
       id: build-image
       run: |
-        docker build "$GITHUB_WORKSPACE/" -f  "Dockerfile" -t czwartekaks.azurecr.io/demov2:${{ github.sha }}
-        docker push czwartekaks.azurecr.io/demov2:${{ github.sha }}
+        docker build "$GITHUB_WORKSPACE/" -f  "Dockerfile" -t czwartekaks.azurecr.io/demo:${{ github.sha }}
+        docker push czwartekaks.azurecr.io/demo:${{ github.sha }}
     
     - uses: azure/k8s-set-context@v1
       with:
-         kubeconfig: ${{ secrets.aks_demov2_kubeConfig }}
+        kubeconfig: ${{ secrets.aks_demo_kubeConfig }}
       id: login
     
     - name: Create namespace
       run: |
-        namespacePresent=`kubectl get namespace | grep demov2ad25 | wc -l`
+        namespacePresent=`kubectl get namespace | grep demof84a | wc -l`
         if [ $namespacePresent -eq 0 ]
         then
-            echo `kubectl create namespace demov2ad25`
+            echo `kubectl create namespace demof84a`
         fi
 
     - uses: azure/k8s-create-secret@v1
       with:
-        namespace: demov2ad25
+        namespace: demof84a
         container-registry-url: czwartekaks.azurecr.io
         container-registry-username: ${{ secrets.acr_czwartekaks_username }}
         container-registry-password: ${{ secrets.acr_czwartekaks_password }}
-        secret-name: demov2dockerauth
-       
+        secret-name: demodockerauth
+
     - uses: azure/k8s-deploy@v1
       with:
-        namespace: demov2ad25
+        namespace: demof84a
         manifests: |
-          manifests/deployment-1.yml
-          manifests/service-1.yml
+          manifests/deployment.yml
+          manifests/service.yml
         images: |
-          czwartekaks.azurecr.io/demov2:${{ github.sha }}
+          czwartekaks.azurecr.io/demo:${{ github.sha }}
         imagepullsecrets: |
-          demov2dockerauth
+          demodockerauth
